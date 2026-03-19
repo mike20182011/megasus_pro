@@ -1,4 +1,4 @@
-import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException, Get, Param } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HttpService } from '@nestjs/axios';
 import { VehiculosService } from './vehiculos.service';
@@ -13,66 +13,81 @@ export class VehiculosController {
   ) {}
 
   @Post('escanear')
-  @UseInterceptors(FileInterceptor('image')) // El Front debe enviar el archivo en el campo 'image'
-  async escanearPlaca(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('No se recibió ninguna imagen');
+@UseInterceptors(FileInterceptor('image')) 
+async escanearPlaca(@UploadedFile() file: Express.Multer.File) {
+  if (!file) {
+    throw new BadRequestException('No se recibió ninguna imagen');
+  }
+
+  // LOG 1: Verificar que la imagen llegó al Back
+  console.log(`[Back] Imagen recibida: ${file.originalname} (${file.size} bytes)`);
+
+  const formData = new FormData();
+  formData.append('file', file.buffer, { 
+    filename: file.originalname,
+    contentType: file.mimetype 
+  });
+
+  try {
+    // LOG 2: Intentando conectar con Python
+    console.log('[Back] Enviando a Python (FastAPI)...');
+
+    const respuestaPython = await lastValueFrom(
+      this.httpService.post('http://localhost:8000/detect-plate', formData, {
+        headers: formData.getHeaders(),
+        timeout: 15000, // <--- 15 segundos de espera máxima para la IA
+      }),
+    );
+
+    const placaDetectada = respuestaPython.data.placa;
+    
+    // LOG 3: Ver que respondió la IA
+    console.log(`[Back] Python respondió: ${placaDetectada}`);
+
+    if (!placaDetectada || placaDetectada === 'No detectada') {
+      return { 
+        success: false, 
+        message: 'La IA no identificó una placa clara' 
+      };
     }
 
-    // 1. Preparar la imagen para enviarla al microservicio de Python (FastAPI)
-    const formData = new FormData();
-    formData.append('file', file.buffer, { 
-      filename: file.originalname,
-      contentType: file.mimetype 
-    });
+    // 3. Consultar en PostgreSQL
+    const datosCompletos = await this.vehiculosService.buscarDatosCompletos(placaDetectada);
 
-    try {
-      // 2. Llamada a la API de Python (IA)
-      // Ajusta la URL si tu API de Python corre en otro puerto
-      const respuestaPython = await lastValueFrom(
-        this.httpService.post('http://localhost:8000/detect-plate', formData, {
-          headers: formData.getHeaders(),
-        }),
-      );
-
-      const placaDetectada = respuestaPython.data.placa;
-
-      // Si la IA no detecta nada o devuelve el error controlado
-      if (!placaDetectada || placaDetectada === 'No detectada') {
-        return { 
-          success: false, 
-          message: 'La Inteligencia Artificial no pudo identificar una placa clara' 
-        };
-      }
-
-      // 3. Consultar en PostgreSQL (Vehículo + Deudas)
-      const datosCompletos = await this.vehiculosService.buscarDatosCompletos(placaDetectada);
-
-      // Si la placa existe pero no está en nuestra DB
-      if (!datosCompletos) {
-        return {
-          success: true,
-          placa: placaDetectada,
-          registrado: false,
-          message: `La placa ${placaDetectada} no está registrada en el sistema Megasus`,
-        };
-      }
-
-      // 4. Respuesta exitosa al Frontend
+    if (!datosCompletos) {
       return {
         success: true,
-        registrado: true,
-        ...datosCompletos, // Esto incluye los datos del vehiculo, el array de deudas y el total_deuda
+        placa: placaDetectada,
+        registrado: false,
+        message: `La placa ${placaDetectada} no está registrada`,
       };
-
-    } catch (error) {
-      // Log para debugging en la consola de NestJS
-      console.error('Error en el flujo de escaneo:', error.message);
-      
-      throw new BadRequestException({
-        message: 'Error de comunicación con el servicio de IA o Base de Datos',
-        detail: error.message
-      });
     }
+
+    return {
+      success: true,
+      registrado: true,
+      ...datosCompletos,
+    };
+
+  } catch (error) {
+    // LOG DETALLADO PARA DIAGNÓSTICO
+    if (error.code === 'ECONNABORTED') {
+      console.error('Error: Python tardó demasiado (Timeout)');
+    } else if (error.code === 'ECONNREFUSED') {
+      console.error('Error: El servidor de Python no está encendido en el puerto 8000');
+    } else {
+      console.error('Error en el flujo de escaneo:', error.message);
+    }
+    
+    throw new BadRequestException({
+      message: 'Error de comunicación con el servicio de IA',
+      detail: error.message
+    });
   }
+}
+
+  @Get('buscar/:placa')
+async buscarPorPlaca(@Param('placa') placa: string) {
+  return this.vehiculosService.findByPlaca(placa);
+}
 }

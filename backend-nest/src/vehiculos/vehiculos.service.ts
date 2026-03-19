@@ -28,4 +28,16 @@ export class VehiculosService {
       total_deuda: total
     };
   }
+
+  async findByPlaca(placa: string) {
+  const vehiculo = await this.vehiculosRepo.findOne({ where: { placa } });
+  if (!vehiculo) {
+    return { success: true, registrado: false, placa };
+  }
+  return { 
+    success: true, 
+    registrado: true, 
+    ...vehiculo 
+  };
+}
 }

@@ -1,11 +1,12 @@
 import { Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // 1. IMPORTANTE para que el input funcione
 import { ApiService } from './services/api.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule], // Quitamos RouterOutlet porque no lo necesitamos ahora
+  imports: [CommonModule, FormsModule], // 2. AÑADIMOS FormsModule aquí
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -15,36 +16,53 @@ export class App {
 
   private apiService = inject(ApiService);
   
-  // Signals para manejar el estado de la UI
   escaneando = signal(false);
   resultado = signal<any>(null);
   error = signal<string | null>(null);
   intervalo: any;
 
-  async iniciarCamara() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      video: { 
-        facingMode: 'environment', 
-        // Cambiamos a formato horizontal (16:9 o 4:3)
-        width: { ideal: 1280 }, 
-        height: { ideal: 720 } 
-      } 
-    });
-    if (this.videoElement) {
-      this.videoElement.nativeElement.srcObject = stream;
-      this.error.set(null);
+  // 3. NUEVA FUNCIÓN: Para el input manual
+  // Esta función se llama cada vez que escribes en el cuadro de texto
+  buscarPlacaManual(placa: string) {
+    const p = placa.trim().toUpperCase();
+    
+    // Solo buscamos en el servidor si hay al menos 3 caracteres
+    if (p.length >= 3) {
+      this.apiService.buscarPorTexto(p).subscribe({
+        next: (res) => {
+          // Actualizamos el signal de resultado. 
+          // Si no existe en la DB, el servicio de NestJS ya nos devuelve 'registrado: false'
+          this.resultado.set(res);
+        },
+        error: (err) => console.error("Error buscando placa manual:", err)
+      });
+    } else if (p.length === 0) {
+      this.resultado.set(null); // Limpiamos si borran el input
     }
-  } catch (err) {
-    this.error.set("No se pudo acceder a la cámara.");
   }
-}
+
+  async iniciarCamara() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment', 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 } 
+        } 
+      });
+      if (this.videoElement) {
+        this.videoElement.nativeElement.srcObject = stream;
+        this.error.set(null);
+      }
+    } catch (err) {
+      this.error.set("No se pudo acceder a la cámara.");
+    }
+  }
 
   toggleEscaneo() {
     if (!this.escaneando()) {
       this.iniciarCamara();
       this.escaneando.set(true);
-      // Captura una foto cada 2.5 segundos
       this.intervalo = setInterval(() => this.capturarYEnviar(), 2500);
     } else {
       this.escaneando.set(false);
@@ -54,6 +72,7 @@ export class App {
     }
   }
 
+  // 4. FUNCIÓN ACTUALIZADA: Captura desde cámara
   capturarYEnviar() {
     const video = this.videoElement?.nativeElement;
     const canvas = this.canvasElement?.nativeElement;
@@ -68,20 +87,17 @@ export class App {
 
       canvas.toBlob((blob) => {
         if (blob) {
+          // Primero enviamos la imagen a NestJS (que luego irá a Python)
           this.apiService.enviarImagen(blob).subscribe({
             next: (res) => {
-              // Si la IA detectó caracteres (aunque no estén en la DB)
+              // Si la IA detectó una placa, la ponemos en el resultado
               if (res.success) {
-                this.resultado.set(res); 
-                // Al hacer .set(res), Angular refresca la pantalla automáticamente
-                console.log("Procesando placa:", res.placa);
-              } else {
-                // Opcional: Si la IA no detecta nada, podrías limpiar el resultado previo tras unos segundos
-                // this.resultado.set(null); 
+                this.resultado.set(res);
+                console.log("IA detectó y buscó:", res.placa);
               }
             },
             error: (err) => {
-              console.error("Error en la comunicación con el servidor", err);
+              console.error("Error en comunicación con el servidor", err);
             }
           });
         }

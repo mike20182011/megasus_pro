@@ -1,0 +1,12 @@
+# Ignorar entornos virtuales
+ai-service-python/.venv/
+.venv/
+venv/
+
+# Ignorar Node (Angular y Nest)
+**/node_modules/
+**/dist/
+.angular/
+
+# Ignorar archivos locales
+.env

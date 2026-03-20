@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // 1. IMPORTANTE para que el input funcione
 import { ApiService } from './services/api.service';
 
+
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -10,12 +12,15 @@ import { ApiService } from './services/api.service';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
+
+
 export class App {
+  
   @ViewChild('video') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvas') canvasElement!: ElementRef<HTMLCanvasElement>;
 
   private apiService = inject(ApiService);
-  
+  cargando = false;
   escaneando = signal(false);
   resultado = signal<any>(null);
   error = signal<string | null>(null);
@@ -59,49 +64,76 @@ export class App {
     }
   }
 
-  toggleEscaneo() {
-    if (!this.escaneando()) {
-      this.iniciarCamara();
-      this.escaneando.set(true);
-      this.intervalo = setInterval(() => this.capturarYEnviar(), 2500);
-    } else {
-      this.escaneando.set(false);
-      clearInterval(this.intervalo);
-      const stream = this.videoElement?.nativeElement.srcObject as MediaStream;
-      stream?.getTracks().forEach(track => track.stop());
-    }
-  }
 
+
+toggleEscaneo() {
+  if (!this.escaneando()) {
+    this.iniciarCamara();
+    this.escaneando.set(true);
+    // Bajamos a 1.5 segundos para mayor fluidez
+    this.intervalo = setInterval(() => {
+      if (!this.cargando) {
+        this.capturarYEnviar();
+      }
+    }, 1500); 
+  } else {
+    this.escaneando.set(false);
+    clearInterval(this.intervalo);
+    // ... stop tracks
+  }
+}
   // 4. FUNCIÓN ACTUALIZADA: Captura desde cámara
-  capturarYEnviar() {
-    const video = this.videoElement?.nativeElement;
-    const canvas = this.canvasElement?.nativeElement;
-    if (!video || !canvas) return;
+capturarYEnviar() {
+  const video = this.videoElement?.nativeElement;
+  const canvas = this.canvasElement?.nativeElement;
+  
+  if (!video || !canvas || this.cargando) return;
 
-    const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d');
 
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context?.drawImage(video, 0, 0, canvas.width, canvas.height);
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.width = 640; 
+    canvas.height = 360; 
+    
+    context?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      canvas.toBlob((blob) => {
-        if (blob) {
-          // Primero enviamos la imagen a NestJS (que luego irá a Python)
-          this.apiService.enviarImagen(blob).subscribe({
-            next: (res) => {
-              // Si la IA detectó una placa, la ponemos en el resultado
-              if (res.success) {
-                this.resultado.set(res);
-                console.log("IA detectó y buscó:", res.placa);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        this.cargando = true;
+
+        this.apiService.enviarImagen(blob).subscribe({
+          next: (res) => {
+            this.cargando = false;
+
+            if (res.success) {
+              // 1. Guardamos la placa anterior ANTES de actualizar
+              const placaAnterior = this.resultado()?.placa;
+
+              // 2. Actualizamos el Signal con las nuevas coordenadas y placa
+              // Esto disparará el movimiento en el HTML inmediatamente
+              this.resultado.set(res); 
+
+              // 3. Solo logueamos si el TEXTO de la placa cambió
+              if (res.placa !== placaAnterior) {
+                console.log("🎯 Objetivo fijado:", res.placa);
+                console.log("📍 Coordenadas:", res.coords);
               }
-            },
-            error: (err) => {
-              console.error("Error en comunicación con el servidor", err);
+            } else {
+              // Si falla la detección, quitamos las coordenadas para que el cuadro
+              // no se quede "flotando" sobre la nada
+              const actual = this.resultado();
+              if (actual && actual.coords) {
+                this.resultado.set({ ...actual, coords: null });
+              }
             }
-          });
-        }
-      }, 'image/jpeg', 0.8);
-    }
+          },
+          error: (err) => {
+            this.cargando = false;
+            console.error("❌ Error de enlace:", err);
+          }
+        });
+      }
+    }, 'image/jpeg', 0.6);
   }
+}
 }

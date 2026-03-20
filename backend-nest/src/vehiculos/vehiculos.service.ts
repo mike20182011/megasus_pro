@@ -29,15 +29,18 @@ export class VehiculosService {
     };
   }
 
-  async findByPlaca(placa: string) {
+  async findByPlaca(placa: string, coords?: any) { // Añadimos coords opcional
   const vehiculo = await this.vehiculosRepo.findOne({ where: { placa } });
+  
   if (!vehiculo) {
-    return { success: true, registrado: false, placa };
+    return { success: true, registrado: false, placa, coords }; // <-- Incluimos coords
   }
+  
   return { 
     success: true, 
     registrado: true, 
-    ...vehiculo 
+    ...vehiculo,
+    coords // <-- Incluimos coords
   };
 }
 }

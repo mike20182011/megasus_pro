@@ -19,8 +19,7 @@ async escanearPlaca(@UploadedFile() file: Express.Multer.File) {
     throw new BadRequestException('No se recibió ninguna imagen');
   }
 
-  // LOG 1: Verificar que la imagen llegó al Back
-  console.log(`[Back] Imagen recibida: ${file.originalname} (${file.size} bytes)`);
+  console.log(`[Back] Imagen recibida: ${file.originalname}`);
 
   const formData = new FormData();
   formData.append('file', file.buffer, { 
@@ -29,35 +28,36 @@ async escanearPlaca(@UploadedFile() file: Express.Multer.File) {
   });
 
   try {
-    // LOG 2: Intentando conectar con Python
     console.log('[Back] Enviando a Python (FastAPI)...');
 
     const respuestaPython = await lastValueFrom(
       this.httpService.post('http://localhost:8000/detect-plate', formData, {
         headers: formData.getHeaders(),
-        timeout: 15000, // <--- 15 segundos de espera máxima para la IA
+        timeout: 15000,
       }),
     );
 
-    const placaDetectada = respuestaPython.data.placa;
+    // 1. EXTRAEMOS TODO LO QUE ENVÍA PYTHON (Incluyendo coords)
+    const { placa: placaDetectada, coords, success: iaSuccess } = respuestaPython.data;
     
-    // LOG 3: Ver que respondió la IA
-    console.log(`[Back] Python respondió: ${placaDetectada}`);
+    console.log(`[Back] Python respondió: ${placaDetectada}`, coords);
 
-    if (!placaDetectada || placaDetectada === 'No detectada') {
+    if (!placaDetectada || placaDetectada === 'No detectada' || !iaSuccess) {
       return { 
         success: false, 
         message: 'La IA no identificó una placa clara' 
       };
     }
 
-    // 3. Consultar en PostgreSQL
+    // 2. Consultar en PostgreSQL
     const datosCompletos = await this.vehiculosService.buscarDatosCompletos(placaDetectada);
 
+    // 3. RETORNAR RESULTADO INCLUYENDO LAS COORDENADAS
     if (!datosCompletos) {
       return {
         success: true,
         placa: placaDetectada,
+        coords: coords, // <--- ENVIAR COORDENADAS SI NO ESTÁ REGISTRADO
         registrado: false,
         message: `La placa ${placaDetectada} no está registrada`,
       };
@@ -67,25 +67,17 @@ async escanearPlaca(@UploadedFile() file: Express.Multer.File) {
       success: true,
       registrado: true,
       ...datosCompletos,
+      coords: coords, // <--- ENVIAR COORDENADAS SI ESTÁ REGISTRADO
     };
 
   } catch (error) {
-    // LOG DETALLADO PARA DIAGNÓSTICO
-    if (error.code === 'ECONNABORTED') {
-      console.error('Error: Python tardó demasiado (Timeout)');
-    } else if (error.code === 'ECONNREFUSED') {
-      console.error('Error: El servidor de Python no está encendido en el puerto 8000');
-    } else {
-      console.error('Error en el flujo de escaneo:', error.message);
-    }
-    
+    console.error('Error en el flujo de escaneo:', error.message);
     throw new BadRequestException({
       message: 'Error de comunicación con el servicio de IA',
       detail: error.message
     });
   }
 }
-
   @Get('buscar/:placa')
 async buscarPorPlaca(@Param('placa') placa: string) {
   return this.vehiculosService.findByPlaca(placa);

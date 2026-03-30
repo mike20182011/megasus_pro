@@ -1,0 +1,26 @@
+/* src/app/app.component.css */
+:host {
+  display: block;
+}
+
+/* Opcional: Personalizar el scrollbar para que sea oscuro */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+::-webkit-scrollbar-thumb {
+  background: #4ecca3;
+  border-radius: 4px;
+}
+
+/* Asegura que el fondo detrás de los bordes redondeados sea el color oscuro base */
+.flex.flex-1 {
+  background-color: #1a1a2e;
+}
+
+/* Suavizar las transiciones de colapso */
+aside {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s;
+}

@@ -1,0 +1,13 @@
+table {
+  table-layout: fixed; /* Evita que las columnas bailen según el texto */
+  border-spacing: 0;
+}
+
+tr {
+  box-sizing: border-box;
+}
+
+/* Scrollbar invisible pero funcional si fuera necesaria en móviles */
+.flex-1::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,74 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* IMPORTANTE: No h-screen */
+  width: 100%;
+  overflow: hidden;
+}
+
+video {
+  max-height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+}
+/* Alerta de Robo Estilizada */
+.alerta-robo-pantalla {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 20px solid white;
+  animation: parpadeo-peligro 0.5s infinite;
+}
+
+.icono-alerta { font-size: 80px; display: block; margin-bottom: 10px; }
+.titulo-alerta { font-size: 50px; margin: 0; color: white; font-family: 'Arial Black', sans-serif; text-align: center; }
+.placa-alerta { 
+  background: white; 
+  color: #dc2626; 
+  padding: 15px 40px; 
+  font-size: 60px; 
+  border-radius: 15px; 
+  margin: 20px 0; 
+  font-weight: 900; 
+}
+.boton-cerrar-alerta {
+  padding: 15px 40px;
+  font-weight: 900;
+  cursor: pointer;
+  border-radius: 10px;
+  border: none;
+  background: #1a1a2e;
+  color: white;
+  text-transform: uppercase;
+}
+
+@keyframes parpadeo-peligro {
+  0% { background-color: #dc2626; }
+  50% { background-color: #7f1d1d; }
+  100% { background-color: #dc2626; }
+}
+
+/* Scrollbar Personalizada */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+@keyframes scan {
+  0% { top: 10%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}

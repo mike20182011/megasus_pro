@@ -1,0 +1,87 @@
+<div class="h-full p-4 flex flex-col animate-fadeIn overflow-hidden bg-[#1a1a2e]">
+  
+  <div class="flex justify-between items-center mb-3 flex-shrink-0">
+    <div>
+      <h1 class="text-3xl font-black text-[#4ecca3] tracking-tighter uppercase italic">Monitoreo de Historial</h1>
+      <p class="text-[#95a5a6] text-[10px] font-bold tracking-[0.3em]">ESTADO DE DEUDAS EN TIEMPO REAL</p>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="generarReporteGlobal()" class="bg-slate-800 text-white px-4 py-2 rounded-full font-bold text-[10px] hover:bg-slate-700 transition-all border border-slate-700">
+  📄 GENERAR PDF GLOBAL
+</button>
+      <button (click)="cargarDatos()" class="bg-[#4ecca3] text-[#1a1a2e] px-6 py-2 rounded-full font-black text-xs hover:scale-105 transition-all shadow-[0_0_15px_rgba(78,204,163,0.3)]">
+        REFRESCAR
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!cargando" class="flex-1 bg-[#16213e] border-2 border-[#0f3460] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden">
+    
+    <div class="flex-1 min-h-0 overflow-hidden">
+      <table class="w-full h-full text-left border-collapse table-fixed">
+        <thead class="bg-[#0f3460] text-[#4ecca3] text-[10px] uppercase tracking-widest">
+          <tr>
+            <th class="px-4 py-4 w-16 text-center border-b border-[#1a1a2e]">ID</th>
+            <th class="px-6 py-4 w-1/4 border-b border-[#1a1a2e]">Placa</th>
+            <th class="px-6 py-4 border-b border-[#1a1a2e]">Estado / Deuda</th>
+            <th class="px-6 py-4 border-b border-[#1a1a2e]">Fecha / Hora</th>
+            <th class="px-6 py-4 w-24 text-center border-b border-[#1a1a2e]">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#1a1a2e]">
+          <tr *ngFor="let item of historialPaginado" class="hover:bg-[#1f2945] transition-colors h-[11.11%] group">
+            
+            <td class="px-4 text-[#4ecca3]/40 font-mono text-xs text-center">#{{item.id}}</td>
+            
+            <td class="px-6">
+              <span [ngClass]="item.total_deuda > 0 ? 'border-red-500 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'border-emerald-500 text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]'"
+                    class="bg-black border-2 px-4 py-1 rounded-lg font-black text-xl tracking-wider inline-block">
+                {{item.texto_placa}}
+              </span>
+            </td>
+
+            <td class="px-6">
+              <div class="flex flex-col">
+                <span [class]="item.total_deuda > 0 ? 'text-red-400' : 'text-emerald-400'" class="font-black text-sm">
+                  {{ item.total_deuda > 0 ? (item.total_deuda | number:'1.2-2') + ' Bs.' : 'SIN DEUDA' }}
+                </span>
+                <span class="text-[9px] text-gray-500 uppercase font-bold">{{ item.total_deuda > 0 ? 'Infracción Pendiente' : 'Vehículo al día' }}</span>
+              </div>
+            </td>
+            
+            <td class="px-6">
+              <div class="flex flex-col">
+                <span class="text-white font-bold text-xs">{{item.fecha_hora | date:'dd/MM/yyyy'}}</span>
+                <span class="text-[#4ecca3] text-[10px] font-mono">{{item.fecha_hora | date:'HH:mm:ss'}}</span>
+              </div>
+            </td>
+            
+            <td class="px-6 text-center">
+              <button (click)="generarPDFTicket(item)" class="bg-[#0f3460] hover:bg-[#4ecca3] hover:text-[#1a1a2e] text-[#4ecca3] p-2 rounded-lg transition-all" title="Descargar PDF">
+  <span class="text-sm">📥</span>
+</button>
+            </td>
+          </tr>
+
+          <tr *ngFor="let empty of [].constructor(itemsPorPagina - historialPaginado.length)" class="h-[11.11%]">
+            <td colspan="5"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-[#0f3460]/80 px-8 py-3 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <span class="text-[10px] font-black text-[#4ecca3]">PÁGINA {{paginaActual}} / {{totalPaginas}}</span>
+      </div>
+      
+      <div class="flex items-center gap-6">
+        <button (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1" class="text-[#4ecca3] disabled:opacity-20 hover:scale-125">◀</button>
+        <div class="flex gap-1.5">
+          <div *ngFor="let p of [].constructor(totalPaginas); let i = index" [class]="paginaActual === i + 1 ? 'w-6 bg-[#4ecca3]' : 'w-2 bg-slate-700'" class="h-1 rounded-full transition-all"></div>
+        </div>
+        <button (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas" class="text-[#4ecca3] disabled:opacity-20 hover:scale-125">▶</button>
+      </div>
+    </div>
+  </div>
+</div>

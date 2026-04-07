@@ -1,90 +1,69 @@
-<div class="w-full h-full p-4 font-sans flex flex-col overflow-hidden">
-
-  <div *ngIf="resultado()?.es_robado" class="alerta-robo-pantalla">
-    <div class="texto-alerta">
-      <span class="icono-alerta">⚠️</span>
-      <h1 class="titulo-alerta">¡ALERTA DE ROBO!</h1>
-      <div class="placa-alerta">
-        PLACA: {{ resultado()?.placa }}
-      </div>
-      <button (click)="cerrarAlerta()" class="boton-cerrar-alerta">
-        CERRAR AVISO Y CONTINUAR
-      </button>
-    </div>
-  </div>
+<div class="w-full min-h-full lg:h-full p-2 md:p-4 font-sans flex flex-col overflow-x-hidden overflow-y-auto lg:overflow-hidden bg-megasus-dark">
 
   <div class="max-w-7xl mx-auto w-full flex flex-col h-full min-h-0">
     
-    <header class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2 flex-shrink-0">
+    <header class="flex justify-between items-center mb-3 md:mb-4 border-b border-white/10 pb-2 flex-shrink-0">
       <div>
-        <h1 class="text-2xl font-black text-blue-500 italic uppercase leading-none tracking-tighter">
+        <h1 class="text-xl md:text-2xl font-black text-megasus-green italic uppercase leading-none tracking-tighter">
           Megasus <span class="text-white">Pro</span>
         </h1>
-        <p class="text-[8px] text-slate-500 tracking-[0.3em] font-bold mt-1 uppercase">SISTEMA DE ANÁLISIS VIAL</p>
+        <p class="text-[7px] md:text-[8px] text-white/40 tracking-[0.3em] font-bold mt-1 uppercase">SISTEMA DE ANÁLISIS VIAL</p>
       </div>
       
-      <div class="flex items-center gap-3 bg-slate-900 px-4 py-1.5 rounded-full border border-slate-800">
-        <div [class]="escaneando() ? 'bg-red-500 shadow-[0_0_10px_red] animate-pulse' : 'bg-slate-700'" class="w-2 h-2 rounded-full"></div>
-        <span class="text-[8px] font-black uppercase tracking-widest text-slate-400">
-          {{ escaneando() ? 'Radar en Vivo' : 'En Espera' }}
+      <div class="flex items-center gap-2 md:gap-3 bg-black/40 px-3 md:px-4 py-1 rounded-full border border-white/10">
+        <div [class]="escaneando() ? 'bg-megasus-green shadow-[0_0_10px_#4ecca3] animate-pulse' : 'bg-white/20'" class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full"></div>
+        <span class="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/60">
+          {{ escaneando() ? 'Radar Activo' : 'Standby' }}
         </span>
       </div>
     </header>
 
-    <div class="grid lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 flex-1 min-h-0">
       
-      <div class="lg:col-span-7 flex flex-col min-h-0 h-full">
-        <div class="relative flex-1 rounded-[2rem] overflow-hidden border-4 border-slate-800 bg-black shadow-2xl">
-          <video #video class="w-full h-full object-cover" [class.opacity-30]="!escaneando()" autoplay playsinline></video>
-          <canvas #canvas class="hidden"></canvas>
+      <div class="lg:col-span-7 flex flex-col min-h-[250px] md:min-h-[400px] lg:min-h-0 h-full">
+        <div class="relative flex-1 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden border-2 border-white/10 bg-black shadow-2xl">
+          <video #video class="w-full h-full object-cover" [class.opacity-40]="!escaneando()" autoplay playsinline></video>
           
           <div *ngIf="escaneando()" class="absolute inset-0 pointer-events-none z-20">
-            <div class="w-full h-0.5 bg-blue-400 shadow-[0_0_15px_#3b82f6] absolute animate-[scan_3s_ease-in-out_infinite]"></div>
-            
-            <div *ngIf="resultado()?.coords" class="absolute border-2 border-blue-500 transition-all duration-150"
-                 [style.left.%]="(resultado().coords.x / 640) * 100"
-                 [style.top.%]="(resultado().coords.y / 360) * 100"
-                 [style.width.%]="(resultado().coords.w / 640) * 100"
-                 [style.height.%]="(resultado().coords.h / 360) * 100">
-            </div>
+            <div class="w-full h-0.5 bg-megasus-green shadow-[0_0_15px_#4ecca3] absolute animate-[scan_3s_ease-in-out_infinite]"></div>
           </div>
         </div>
 
         <button (click)="toggleEscaneo()" 
-          [class]="escaneando() ? 'bg-white text-slate-950' : 'bg-blue-600 text-white'"
-          class="w-full mt-3 py-4 rounded-2xl font-black text-lg transition-all active:scale-95 uppercase flex-shrink-0 shadow-lg">
+          [class]="escaneando() ? 'bg-white text-megasus-dark' : 'bg-transparent border-2 border-megasus-green text-megasus-green shadow-[0_0_15px_rgba(78,204,163,0.3)]'"
+          class="w-full mt-3 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-base md:text-lg transition-all active:scale-95 uppercase flex-shrink-0">
           {{ escaneando() ? 'Desactivar Radar' : 'Iniciar Escaneo' }}
         </button>
       </div>
 
-      <div class="lg:col-span-5 flex flex-col min-h-0 gap-3">
+      <div class="lg:col-span-5 flex flex-col min-h-0 gap-3 pb-4 lg:pb-0">
         
-        <div class="bg-slate-900 p-4 rounded-[1.5rem] border border-slate-800 flex-shrink-0">
-          <label class="text-[8px] font-black text-slate-500 uppercase tracking-[0.4em] block mb-1 italic">Identificación IA</label>
-          <div class="bg-black border-2 border-slate-800 rounded-xl py-2 flex items-center justify-center">
-            <span [class.text-emerald-400]="resultado()?.success" class="text-4xl font-mono font-black text-blue-400 uppercase tracking-tighter">
+        <div class="glass-panel p-3 md:p-4 rounded-[1.2rem] md:rounded-[1.5rem] flex-shrink-0">
+          <label class="text-[7px] md:text-[8px] font-black text-megasus-green uppercase tracking-[0.4em] block mb-1 italic">Identificación IA</label>
+          <div class="bg-black/40 border border-white/10 rounded-xl py-2 flex items-center justify-center">
+            <span [class.text-megasus-green]="resultado()?.success" class="text-3xl md:text-4xl font-mono font-black text-white/20 uppercase tracking-tighter">
               {{ resultado()?.placa || '--- ---' }}
             </span>
           </div>
         </div>
 
-        <div class="flex-1 bg-slate-900 border border-slate-800 rounded-[2rem] p-5 shadow-xl overflow-hidden flex flex-col min-h-0">
+        <div class="flex-1 glass-panel rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-5 shadow-xl flex flex-col min-h-[300px] lg:min-h-0">
           <div *ngIf="resultado()?.success; else espera" class="flex flex-col h-full">
             <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
               <div *ngIf="resultado().registrado; else noRegistrado" class="flex flex-col gap-3">
-                <div class="border-b border-slate-800 pb-3">
-                  <p class="text-[8px] font-bold text-slate-500 uppercase mb-1 italic tracking-widest">Propietario</p>
-                  <h2 class="text-lg font-black text-white leading-tight uppercase truncate">{{ resultado().propietario }}</h2>
-                  <div class="flex gap-2 mt-1">
-                    <span class="bg-blue-600/10 text-blue-400 text-[8px] px-2 py-0.5 rounded-full border border-blue-500/20 font-bold uppercase">{{ resultado().marca }}</span>
-                    <span class="bg-slate-800 text-slate-400 text-[8px] px-2 py-0.5 rounded-full border border-slate-700 font-bold uppercase">{{ resultado().modelo }}</span>
+                <div class="border-b border-white/10 pb-3">
+                  <p class="text-[8px] font-bold text-white/40 uppercase mb-1 italic tracking-widest">Propietario</p>
+                  <h2 class="text-base md:text-lg font-black text-white leading-tight uppercase">{{ resultado().propietario }}</h2>
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    <span class="bg-megasus-green/10 text-megasus-green text-[7px] md:text-[8px] px-2 py-0.5 rounded-full border border-megasus-green/20 font-bold uppercase">{{ resultado().marca }}</span>
+                    <span class="bg-white/5 text-white/40 text-[7px] md:text-[8px] px-2 py-0.5 rounded-full border border-white/10 font-bold uppercase">{{ resultado().modelo }}</span>
                   </div>
                 </div>
 
-                <div [class]="resultado().total_deuda > 0 ? 'bg-red-600/10 border-red-500/30' : 'bg-emerald-600/10 border-emerald-500/30'"
-                     class="p-4 rounded-xl border-2 text-center transition-all">
-                  <span class="text-[8px] uppercase font-black text-slate-400 block mb-1">Saldo</span>
-                  <p [class]="resultado().total_deuda > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-3xl font-black tracking-tighter">
+                <div [class]="resultado().total_deuda > 0 ? 'bg-megasus-red/10 border-megasus-red/30 shadow-[0_0_15px_rgba(233,69,96,0.1)]' : 'bg-megasus-green/10 border-megasus-green/30 shadow-[0_0_15px_rgba(78,204,163,0.1)]'"
+                     class="p-4 rounded-xl border-2 text-center transition-all mt-2">
+                  <span class="text-[8px] uppercase font-black text-white/40 block mb-1">Estado de Deuda</span>
+                  <p [class]="resultado().total_deuda > 0 ? 'text-megasus-red' : 'text-megasus-green'" class="text-2xl md:text-3xl font-black tracking-tighter">
                     {{ resultado().total_deuda | number:'1.2-2' }} <span class="text-xs">Bs.</span>
                   </p>
                 </div>
@@ -92,27 +71,40 @@
 
               <ng-template #noRegistrado>
                 <div class="h-full flex items-center justify-center text-center py-6">
-                  <div class="bg-amber-500/5 border-2 border-dashed border-amber-500/20 p-4 rounded-2xl w-full">
-                    <h3 class="text-amber-500 font-black text-xs uppercase italic">Sin Coincidencias</h3>
-                    <p class="text-slate-500 text-[8px] uppercase font-bold tracking-widest mt-1">Placa no registrada</p>
+                  <div class="bg-megasus-red/5 border-2 border-dashed border-megasus-red/20 p-6 rounded-2xl w-full">
+                    <h3 class="text-megasus-red font-black text-sm uppercase italic">Sin Registro</h3>
+                    <p class="text-white/40 text-[9px] uppercase font-bold tracking-widest mt-2">
+                      Vehículo no identificado en el sistema
+                    </p>
                   </div>
                 </div>
               </ng-template>
-            </div>
+
+              </div>
 
             <button (click)="guardarEnHistorial()" 
-                    class="mt-3 w-full bg-[#4ecca3] hover:bg-[#45b791] text-[#1a1a2e] py-3 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-2 flex-shrink-0 transition-transform active:scale-95">
-              📸 GUARDAR HISTORIAL
+                    class="mt-3 w-full bg-megasus-green hover:shadow-[0_0_20px_#4ecca3] text-megasus-dark py-3 rounded-xl font-black text-xs uppercase transition-all active:scale-95">
+              📸 REGISTRAR EN NUBE
             </button>
+
+            
           </div>
 
           <ng-template #espera>
-            <div class="h-full flex flex-col items-center justify-center opacity-30">
-              <div *ngIf="escaneando()" class="animate-spin rounded-full h-6 w-6 border-t-2 border-blue-500 mb-2"></div>
-              <p class="text-[8px] font-black uppercase tracking-[0.4em] text-blue-400">Analizando...</p>
+            <div class="h-full flex flex-col items-center justify-center space-y-4">
+              <div *ngIf="escaneando()" class="relative">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-megasus-green"></div>
+                <div class="absolute inset-0 animate-ping rounded-full h-10 w-10 border border-megasus-green/30"></div>
+              </div>
+              <p class="text-[10px] font-black uppercase tracking-[0.5em] text-megasus-green/40 animate-pulse text-center">
+                {{ escaneando() ? 'Analizando Entorno...' : 'Sistema en Espera' }}
+              </p>
             </div>
           </ng-template>
-        </div>
+          
+          </div>
+
+          
       </div>
     </div>
   </div>

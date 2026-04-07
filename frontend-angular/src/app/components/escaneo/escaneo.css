@@ -1,58 +1,86 @@
+/* --- COMPORTAMIENTO DEL CONTENEDOR PRINCIPAL --- */
 :host {
   display: flex;
   flex-direction: column;
-  height: 100%; /* IMPORTANTE: No h-screen */
   width: 100%;
-  overflow: hidden;
 }
 
+/* En Escritorio (Pantallas grandes) bloqueamos el scroll para que todo quepa en una vista */
+@media (min-width: 1024px) {
+  :host {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* En Móviles/Tablets permitimos el scroll vertical para ver los datos debajo del video */
+@media (max-width: 1023px) {
+  :host {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* --- VIDEO Y CÁMARA --- */
 video {
-  max-height: 100%;
   width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.grid {
-  flex: 1;
-  min-height: 0;
-}
-/* Alerta de Robo Estilizada */
+/* --- ALERTA DE ROBO (AJUSTADA PARA CELULARES) --- */
 .alerta-robo-pantalla {
   position: fixed !important;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   z-index: 99999 !important;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 20px solid white;
+  border: 10px solid white; /* Reducido para móvil */
   animation: parpadeo-peligro 0.5s infinite;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.icono-alerta { font-size: 80px; display: block; margin-bottom: 10px; }
-.titulo-alerta { font-size: 50px; margin: 0; color: white; font-family: 'Arial Black', sans-serif; text-align: center; }
+/* Ajustes de texto de alerta responsivos */
+.icono-alerta { font-size: 15vw; display: block; margin-bottom: 10px; }
+.titulo-alerta { font-size: 8vw; margin: 0; color: white; font-family: 'Arial Black', sans-serif; text-align: center; line-height: 1; }
 .placa-alerta { 
   background: white; 
   color: #dc2626; 
-  padding: 15px 40px; 
-  font-size: 60px; 
-  border-radius: 15px; 
-  margin: 20px 0; 
+  padding: 10px 20px; 
+  font-size: 12vw; 
+  border-radius: 10px; 
+  margin: 15px 0; 
   font-weight: 900; 
 }
-.boton-cerrar-alerta {
-  padding: 15px 40px;
-  font-weight: 900;
-  cursor: pointer;
-  border-radius: 10px;
-  border: none;
-  background: #1a1a2e;
-  color: white;
-  text-transform: uppercase;
+
+/* En pantallas grandes, limitamos el tamaño máximo de la alerta */
+@media (min-width: 1024px) {
+  .alerta-robo-pantalla { border-width: 20px; }
+  .icono-alerta { font-size: 80px; }
+  .titulo-alerta { font-size: 50px; }
+  .placa-alerta { font-size: 60px; padding: 15px 40px; }
 }
+
+/* --- ANIMACIÓN DE ESCANEO --- */
+@keyframes scan {
+  0% { top: 0%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* --- UTILIDADES --- */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4ecca3; }
 
 @keyframes parpadeo-peligro {
   0% { background-color: #dc2626; }
@@ -60,15 +88,46 @@ video {
   100% { background-color: #dc2626; }
 }
 
-/* Scrollbar Personalizada */
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 
+
+
+
+/* Efecto de parpadeo suave para el texto del radar */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+/* --- ANIMACIÓN DE ESCANEO (VERDE MEGASUS) --- */
 @keyframes scan {
-  0% { top: 10%; opacity: 0; }
-  20% { opacity: 1; }
+  0% { top: 0%; opacity: 0; }
+  20% { opacity: 1; filter: brightness(1.5); }
   80% { opacity: 1; }
-  100% { top: 90%; opacity: 0; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* --- SCROLLBAR ESTILO CYBERPUNK --- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-megasus-green); /* Usando la variable del styles.css */
+  border-radius: 10px;
+  box-shadow: 0 0 5px var(--color-megasus-green);
+}
+
+/* Alerta de robo: Mantenemos el rojo pero con tipografía más agresiva */
+.placa-alerta { 
+  background: white; 
+  color: #e94560; /* Megasus Red */
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
 }

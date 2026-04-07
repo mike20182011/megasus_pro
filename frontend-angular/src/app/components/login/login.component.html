@@ -1,19 +1,29 @@
-<div class="login-container">
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <h2>Megasus AI - Acceso</h2>
-    
-    <div class="field">
-      <label>Email</label>
-      <input type="email" formControlName="email" placeholder="admin@ejemplo.com">
-    </div>
+<div class="main-container">
+  <div class="login-wrapper">
+    <div class="login-card">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <h2 class="megasus-title">
+          Megasus <span class="ai-text">AI</span>
+        </h2>
+        <p class="subtitle">Acceso al Sistema</p>
+        
+        <div class="field">
+          <input type="email" formControlName="email" id="email" placeholder="Email" class="glass-input">
+        </div>
 
-    <div class="field">
-      <label>Contraseña</label>
-      <input type="password" formControlName="password" placeholder="******">
-    </div>
+        <div class="field password-field">
+          <input type="password" formControlName="password" id="password" placeholder="Contraseña" class="glass-input">
+          <span class="password-toggle">👁️</span>
+        </div>
 
-    <button type="submit" [disabled]="loginForm.invalid">Ingresar</button>
-    
-    <p *ngIf="error" class="error">{{ error }}</p>
-  </form>
+        <div class="button-wrapper">
+          <button type="submit" [disabled]="loginForm.invalid" class="login-button">
+            Ingresar
+          </button>
+        </div>
+        
+        <p *ngIf="error" class="error-message">{{ error }}</p>
+      </form>
+    </div>
+  </div>
 </div>

@@ -6,12 +6,12 @@ import { InactividadService } from './services/inactividad.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, CommonModule,],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class AppComponent {
-  menuColapsado = false;
+  menuColapsado = true;
   constructor(
     private router: Router,
     private inactividadService: InactividadService
@@ -32,4 +32,9 @@ export class AppComponent {
     localStorage.removeItem('user');
     this.router.navigate(['/login']);
   }
+
+  navegarYPrincipal(ruta: string) {
+  this.router.navigate([ruta]);
+  this.menuColapsado = true; // Esto cierra la barra automáticamente
+}
 }

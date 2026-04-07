@@ -1,6 +1,7 @@
 /* src/app/app.component.css */
 :host {
   display: block;
+  background-color: var(--color-megasus-dark);
 }
 
 /* Opcional: Personalizar el scrollbar para que sea oscuro */

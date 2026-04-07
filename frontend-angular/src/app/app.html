@@ -1,21 +1,21 @@
 <div class="flex flex-col h-screen bg-[#1a1a2e] text-white overflow-hidden" *ngIf="!esPaginaLogin()">
   
-  <header class="h-16 bg-[#0f3460] m-4 mb-0 rounded-[1.5rem] border-b-2 border-[#4ecca3] flex items-center justify-between px-6 shadow-lg z-50 flex-shrink-0">
-    <div class="flex items-center gap-4">
+  <header class="h-16 bg-[#0f3460] m-2 md:m-4 md:mb-0 rounded-[1rem] md:rounded-[1.5rem] border-b-2 border-[#4ecca3] flex items-center justify-between px-4 md:px-6 shadow-lg z-50 flex-shrink-0">
+    <div class="flex items-center gap-2 md:gap-4">
       <button (click)="toggleMenu()" class="p-2 hover:bg-[#16213e] rounded-lg transition-colors text-[#4ecca3]">
-        <span class="text-2xl">{{ menuColapsado ? '➔' : '☰' }}</span>
+        <span class="text-2xl">{{ menuColapsado ? '☰' : '✕' }}</span>
       </button>
-      <div class="text-xl font-bold tracking-widest hidden md:block">
+      <div class="text-lg md:text-xl font-bold tracking-widest">
         MEGASUS <span class="text-[#4ecca3]">AI</span>
       </div>
     </div>
 
     <div class="relative group cursor-pointer py-2">
       <div class="flex items-center gap-3">
-        <span class="text-sm hidden sm:block">Bienvenido, <strong class="text-[#4ecca3]">Admin</strong></span>
-        <div class="w-10 h-10 bg-[#4ecca3] rounded-full flex items-center justify-center text-[#1a1a2e] font-bold shadow-md">AD</div>
+        <span class="text-sm hidden md:block">Bienvenido, <strong class="text-[#4ecca3]">Admin</strong></span>
+        <div class="w-8 h-8 md:w-10 md:h-10 bg-[#4ecca3] rounded-full flex items-center justify-center text-[#1a1a2e] font-bold shadow-md">AD</div>
       </div>
-      <div class="absolute right-0 mt-1 w-48 bg-[#16213e] border border-[#0f3460] rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[100]">
+      <div class="absolute right-0 mt-1 w-40 md:w-48 bg-[#16213e] border border-[#0f3460] rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[100]">
         <a (click)="logout()" class="flex items-center gap-3 px-4 py-3 hover:bg-[#e94560] transition-colors rounded-lg text-sm cursor-pointer">
           <span>🚪</span> Cerrar Sesión
         </a>
@@ -23,36 +23,40 @@
     </div>
   </header>
 
-  <div class="flex flex-1 overflow-hidden">
+  <div class="flex flex-1 overflow-hidden relative">
+    
     <aside 
-      [ngClass]="menuColapsado ? 'w-20' : 'w-64'"
-  class="bg-[#16213e] m-4 mr-0 rounded-[2.5rem] border border-[#1a1a2e] flex flex-col justify-between py-6 transition-all duration-300 ease-in-out flex-shrink-0 shadow-2xl">
+      [ngClass]="menuColapsado ? 'w-0 -translate-x-full' : 'w-64 translate-x-0 ml-4 my-4'"
+      class="bg-[#16213e] rounded-[2rem] border border-[#0f3460] flex flex-col justify-between py-6 transition-all duration-300 ease-in-out flex-shrink-0 shadow-2xl z-40 absolute md:relative h-[calc(100%-2rem)]">
       
-      <nav class="flex flex-col space-y-1">
-        <div class="px-6 py-2 text-[10px] font-bold text-[#4ecca3] tracking-[0.2em] uppercase overflow-hidden whitespace-nowrap"
-         [ngClass]="{'opacity-0': menuColapsado}">Menú Principal</div>
+      <nav class="flex flex-col space-y-1" [class.hidden]="menuColapsado">
+        <div class="px-6 py-2 text-[10px] font-bold text-[#4ecca3] tracking-[0.2em] uppercase overflow-hidden whitespace-nowrap">
+          Menú Principal
+        </div>
         
-        <a routerLink="/escanear" routerLinkActive="bg-[#0f3460] border-l-4 border-[#4ecca3] text-[#4ecca3] rounded-r-xl" 
-       class="flex items-center gap-4 px-6 py-4 text-[#95a5a6] hover:text-white hover:bg-[#0f3460]/50 transition-all group overflow-hidden mx-2 rounded-xl">
-      <span class="text-xl min-w-[24px]">🔍</span> 
-      <span [class.hidden]="menuColapsado" class="whitespace-nowrap font-bold">Escanear Placas</span>
+        <a (click)="navegarYPrincipal('/escanear')" 
+       class="flex items-center gap-4 px-6 py-4 text-[#95a5a6] hover:text-white hover:bg-[#0f3460]/50 transition-all cursor-pointer mx-2 rounded-xl">
+      <span class="text-xl">🔍</span> 
+      <span class="font-bold">Escanear</span>
     </a>
 
-        <a routerLink="/historial" routerLinkActive="bg-[#0f3460] border-l-4 border-[#4ecca3] text-[#4ecca3] rounded-r-xl" 
-       class="flex items-center gap-4 px-6 py-4 text-[#95a5a6] hover:text-white hover:bg-[#0f3460]/50 transition-all group overflow-hidden mx-2 rounded-xl">
-      <span class="text-xl min-w-[24px]">📋</span> 
-      <span [class.hidden]="menuColapsado" class="whitespace-nowrap font-bold">Historial</span>
+    <a (click)="navegarYPrincipal('/historial')" 
+       class="flex items-center gap-4 px-6 py-4 text-[#95a5a6] hover:text-white hover:bg-[#0f3460]/50 transition-all cursor-pointer mx-2 rounded-xl">
+      <span class="text-xl">📋</span> 
+      <span class="font-bold">Historial</span>
     </a>
       </nav>
 
-      <div class="px-6 text-center text-[10px] text-[#3e4f7a] font-bold ">
-        {{ menuColapsado ? 'V1' : 'v1.0.2 - 2026' }}
+      <div class="px-6 text-center text-[10px] text-[#3e4f7a] font-bold" [class.hidden]="menuColapsado">
+        v1.0.2 - 2026
       </div>
     </aside>
 
     <main class="flex-1 min-w-0 bg-[#1a1a2e] relative z-0 flex flex-col overflow-hidden">
-  <router-outlet></router-outlet>
-</main>
+      <router-outlet></router-outlet>
+    </main>
+
+    <div *ngIf="!menuColapsado" (click)="toggleMenu()" class="absolute inset-0 bg-black/60 z-30 backdrop-blur-sm transition-opacity"></div>
   </div>
 </div>
 

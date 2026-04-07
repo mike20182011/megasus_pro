@@ -1,3 +1,41 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  /* Definimos los colores oficiales para usarlos como text-megasus-green, bg-megasus-dark, etc. */
+  --color-megasus-dark: #0a0a1a;
+  --color-megasus-card: rgba(22, 33, 62, 0.6);
+  --color-megasus-green: #4ecca3;
+  --color-megasus-red: #e94560;
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ESTILOS GLOBALES DE "VIDRIO" */
+body {
+  background-color: var(--color-megasus-dark);
+  /* Opcional: Si quieres que la imagen del login se intuya de fondo en toda la app */
+  background-image: radial-gradient(circle at top right, #16213e, #0a0a1a);
+  background-attachment: fixed;
+  color: white;
+}
+
+/* Clase maestra para cualquier contenedor (Escaneo, Historial, Aside) */
+.glass-panel {
+  background: var(--color-megasus-card) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-glass-border) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Scrollbar estilo Cyberpunk */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-megasus-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-megasus-green);
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--color-megasus-green);
+}

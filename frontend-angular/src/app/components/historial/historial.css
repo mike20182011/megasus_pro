@@ -1,13 +1,24 @@
-table {
-  table-layout: fixed; /* Evita que las columnas bailen según el texto */
-  border-spacing: 0;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ocupa el 100% del contenedor main */
+  width: 100%;
+  overflow: hidden; /* Evita que el componente completo scrollee */
 }
 
-tr {
-  box-sizing: border-box;
+/* El contenedor interno debe ser un flex que respete los límites */
+.flex-1 {
+  min-height: 0; /* Esto permite que el contenedor se encoja si es necesario */
 }
 
-/* Scrollbar invisible pero funcional si fuera necesaria en móviles */
-.flex-1::-webkit-scrollbar {
-  display: none;
+/* Personalizar el scroll para que no ocupe espacio visual */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4ecca3;
+  border-radius: 10px;
 }

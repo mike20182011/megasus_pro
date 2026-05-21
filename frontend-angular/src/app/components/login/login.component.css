@@ -162,3 +162,17 @@
   padding: 0.8rem;
   border-radius: 8px;
 }
+
+
+.glass-input {
+  /* ... tus estilos actuales ... */
+  padding-left: 3rem; /* Espacio para el candado de la izquierda */
+  padding-right: 3rem; /* Espacio para el ojo de la derecha */
+}
+
+/* Para quitar el borde azul que pone el navegador por defecto al hacer click */
+.glass-input:focus {
+  outline: none;
+  border-color: #4ecca3;
+  box-shadow: 0 0 15px rgba(78, 204, 163, 0.2);
+}

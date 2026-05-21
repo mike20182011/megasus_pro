@@ -1,24 +1,260 @@
+/* --- CONFIGURACIÓN BASE DEL COMPONENTE --- */
 :host {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ocupa el 100% del contenedor main */
+  height: 100%;
   width: 100%;
-  overflow: hidden; /* Evita que el componente completo scrollee */
+  overflow: hidden;
 }
 
-/* El contenedor interno debe ser un flex que respete los límites */
 .flex-1 {
-  min-height: 0; /* Esto permite que el contenedor se encoja si es necesario */
+  min-height: 0;
 }
 
-/* Personalizar el scroll para que no ocupe espacio visual */
+/* --- SCROLLBAR PERSONALIZADA (Diseño Glass) --- */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4ecca3;
+  background: rgba(78, 204, 163, 0.3);
   border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(78, 204, 163, 0.6);
+}
+
+/* --- EFECTOS DE INTERFAZ (Botones y Paneles) --- */
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(78, 204, 163, 0.4);
+}
+
+.shadow-glow:hover {
+  box-shadow: 0 0 25px rgba(78, 204, 163, 0.6);
+  transform: translateY(-2px);
+}
+
+/* --- LÓGICA DE FILAS: PRIORIDADES Y ALERTAS --- */
+
+/* 1. AUTO ROBADO (Borde Rojo Fijo) */
+.fila-robado {
+  background-color: rgba(127, 29, 29, 0.3) !important; /* Rojo oscuro transparente */
+  border-left-color: #ff4b2b !important;
+}
+
+/* 2. NUEVO REGISTRO (Parpadeo Amarillo Neón) 
+   Esta es la clase que se activa con idResaltado */
+.resaltado-nuevo {
+  border-left-color: #facc15 !important;
+  animation: animacion-alerta-amarilla 1.5s infinite !important;
+  background-color: rgba(250, 204, 21, 0.1) !important;
+}
+
+/* 3. CASO CRÍTICO: ES ROBADO Y ADEMÁS ES EL ÚLTIMO DETECTADO */
+.fila-robado.resaltado-nuevo {
+  animation: animacion-alerta-mixta 1.5s infinite !important;
+}
+
+/* --- ANIMACIONES --- */
+
+/* Animación para registros normales recién llegados */
+@keyframes animacion-alerta-amarilla {
+  0%, 100% {
+    border-left-width: 4px;
+    box-shadow: inset 10px 0 15px -10px rgba(250, 204, 21, 0.5);
+  }
+  50% {
+    border-left-width: 10px; /* El borde se ensancha */
+    border-left-color: #ffffff !important; /* Brillo blanco tipo flash */
+    box-shadow: inset 20px 0 30px -10px rgba(250, 204, 21, 0.8);
+    background-color: rgba(250, 204, 21, 0.25) !important;
+  }
+}
+
+/* Animación tipo patrulla para autos robados nuevos (Rojo <-> Amarillo) */
+@keyframes animacion-alerta-mixta {
+  0%, 100% { 
+    border-left-color: #ff4b2b !important; 
+    border-left-width: 4px;
+  }
+  50% { 
+    border-left-color: #facc15 !important; 
+    border-left-width: 12px;
+    box-shadow: inset 20px 0 40px -10px rgba(255, 75, 43, 0.6);
+  }
+}
+
+/* Estilo extra para el ID en la fila resaltada */
+.resaltado-nuevo td:first-child {
+  color: #facc15 !important;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+}
+
+/* Forzamos que cualquier fila con resaltado-nuevo ignore a Tailwind */
+tr.resaltado-nuevo, div.resaltado-nuevo {
+  border-left-style: solid !important;
+  border-left-width: 8px !important;
+  border-left-color: #facc15 !important;
+  background-color: rgba(250, 204, 21, 0.2) !important;
+  animation: alerta-megasus-pro 1.5s infinite !important;
+}
+
+/* Si es robado Y nuevo, que parpadee más fuerte */
+tr.fila-robado.resaltado-nuevo, div.fila-robado.resaltado-nuevo {
+  animation: alerta-mixta-policial 1s infinite !important;
+}
+
+@keyframes flash-amarillo {
+  0%, 100% { border-left-color: #facc15; box-shadow: inset 8px 0 10px -5px rgba(250, 204, 21, 0.4); }
+  50% { border-left-color: #ffffff; box-shadow: inset 15px 0 20px -5px rgba(250, 204, 21, 0.8); }
+}
+
+@keyframes flash-mixto {
+  0%, 100% { border-left-color: #ff4b2b; }
+  50% { border-left-color: #facc15; border-left-width: 12px !important; }
+}
+
+
+/* --- ANIMACIONES ÚNICAS --- */
+@keyframes alerta-megasus-pro {
+  0%, 100% { 
+    border-left-color: #facc15; 
+    box-shadow: inset 15px 0 20px -10px rgba(250, 204, 21, 0.5); 
+  }
+  50% { 
+    border-left-color: #ffffff; 
+    box-shadow: inset 25px 0 35px -10px rgba(250, 204, 21, 0.9);
+    background-color: rgba(250, 204, 21, 0.35) !important;
+  }
+}
+
+@keyframes alerta-mixta-policial {
+  0%, 100% { border-left-color: #ff4b2b; }
+  50% { border-left-color: #facc15; border-left-width: 14px !important; }
+}
+
+/* Estilo para el ID */
+.resaltado-nuevo td:first-child {
+  color: #facc15 !important;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+}
+
+/* --- ESTADOS ABSOLUTOS (CON NG-DEEP PARA VENCER A TAILWIND) --- */
+
+::ng-deep .estado-robo-viejo {
+  background-color: rgba(127, 29, 29, 0.3) !important;
+  border-left-color: #ff4b2b !important;
+}
+
+::ng-deep .estado-nuevo-limpio {
+  background-color: rgba(250, 204, 21, 0.15) !important;
+  border-left-color: #facc15 !important;
+  animation: pulso-amarillo-angular 1.5s infinite !important;
+}
+
+::ng-deep .estado-nuevo-critico {
+  background-color: rgba(127, 29, 29, 0.5) !important;
+  animation: pulso-rojo-amarillo 1s infinite !important;
+}
+
+/* --- ANIMACIONES GLOBALES --- */
+
+@keyframes pulso-amarillo-angular {
+  0%, 100% { 
+    border-left-color: #facc15; 
+    box-shadow: inset 10px 0 20px -10px rgba(250, 204, 21, 0.4); 
+  }
+  50% { 
+    border-left-color: #ffffff !important; 
+    border-left-width: 8px !important;
+    box-shadow: inset 20px 0 30px -10px rgba(250, 204, 21, 0.8); 
+  }
+}
+
+@keyframes pulso-rojo-amarillo {
+  0%, 100% { 
+    border-left-color: #ff4b2b; 
+    box-shadow: inset 10px 0 20px -10px rgba(255, 75, 43, 0.5);
+  }
+  50% { 
+    border-left-color: #facc15 !important; 
+    border-left-width: 10px !important; 
+    box-shadow: inset 20px 0 30px -10px rgba(250, 204, 21, 0.8);
+  }
+}
+
+/* Forzar color del texto del ID cuando está resaltado */
+::ng-deep .estado-nuevo-limpio td:first-child,
+::ng-deep .estado-nuevo-critico td:first-child {
+  color: #facc15 !important;
+  font-weight: 900;
+}
+
+/* --- ESTADOS DE LAS FILAS CONTROLADOS POR TYPESCRIPT --- */
+
+/* 1. Placa normal antigua */
+::ng-deep .estado-normal {
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 2. Placa robada antigua (Rojo fijo) */
+::ng-deep .estado-robo-viejo {
+  background-color: rgba(127, 29, 29, 0.3) !important;
+  border-left-color: #ff4b2b !important;
+}
+
+/* 3. PLACA NUEVA Y LIMPIA (El amarillo que no te salía) */
+::ng-deep .estado-nuevo-limpio {
+  border-left-style: solid !important;
+  border-left-width: 6px !important;
+  border-left-color: #facc15 !important;
+  background-color: rgba(250, 204, 21, 0.15) !important;
+  animation: destello-amarillo 1.5s infinite !important;
+}
+
+/* 4. PLACA NUEVA Y ROBADA (Efecto baliza policial) */
+::ng-deep .estado-nuevo-critico {
+  border-left-style: solid !important;
+  background-color: rgba(127, 29, 29, 0.5) !important;
+  animation: destello-mixto 1s infinite !important;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes destello-amarillo {
+  0%, 100% { 
+    border-left-color: #facc15; 
+    box-shadow: inset 15px 0 20px -10px rgba(250, 204, 21, 0.4); 
+  }
+  50% { 
+    border-left-color: #ffffff !important; 
+    border-left-width: 12px !important;
+    box-shadow: inset 30px 0 35px -10px rgba(250, 204, 21, 0.8); 
+  }
+}
+
+@keyframes destello-mixto {
+  0%, 100% { border-left-color: #ff4b2b; }
+  50% { border-left-color: #facc15 !important; border-left-width: 14px !important; }
+}
+
+/* Forzar que el texto del ID también brille en amarillo si es nuevo */
+::ng-deep .estado-nuevo-limpio td:first-child,
+::ng-deep .estado-nuevo-critico td:first-child {
+  color: #facc15 !important;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+}
+
+/* Animación extrema que obliga al parpadeo sin pelear por colores */
+::ng-deep .animacion-forzada {
+  animation: parpadeo-extremo 1s infinite alternate !important;
+}
+
+@keyframes parpadeo-extremo {
+  from { opacity: 1; box-shadow: inset 10px 0 20px -5px rgba(250, 204, 21, 0.5); }
+  to { opacity: 0.6; box-shadow: none; }
 }

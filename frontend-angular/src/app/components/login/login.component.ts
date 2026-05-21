@@ -4,17 +4,27 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule, Eye, EyeOff, Lock } from 'lucide-angular';
+
 
 @Component({
   selector: 'app-login',
   standalone: true, // <--- Verifica que esto diga true
-  imports: [ReactiveFormsModule, CommonModule], // <--- ¡ESTA ES LA CLAVE!
+  imports: [ReactiveFormsModule, CommonModule,LucideAngularModule], // <--- ¡ESTA ES LA CLAVE!
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   loginForm: FormGroup;
   error: string = '';
+
+  // 2. Iconos para el HTML
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+  readonly Lock = Lock;
+
+  // 3. Lógica para mostrar/ocultar
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
@@ -40,4 +50,8 @@ export class LoginComponent {
     });
   }
 }
+
+togglePassword() {
+    this.hidePassword = !this.hidePassword;
+  }
 }

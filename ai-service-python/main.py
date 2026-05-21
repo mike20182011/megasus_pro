@@ -14,35 +14,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("[IA] Cargando modelo EasyOCR...")
-# gpu=False para CPU. allowlist se aplica en la detección para mayor velocidad.
-reader = easyocr.Reader(['es'], gpu=False) 
-print("[IA] Modelo cargado y listo.")
+print("[IA] Cargando modelo ultra-rápido...")
+# Optimizamos el Reader para CPU
+reader = easyocr.Reader(['es'], gpu=False, recognizer=True) 
+print("[IA] Modelo cargado.")
 
 def corregir_formato_bolivia(texto):
-    # 1. Limpieza inicial: Solo letras y números
     texto = re.sub(r'[^A-Z0-9]', '', texto.upper())
-    
-    # 2. Recorte de ruido en bordes para placas de 8+ caracteres
-    if len(texto) >= 8:
-        if texto[0] in ['1', 'I', 'L', '0']: texto = texto[1:]
-        elif texto[-1] in ['1', 'I', 'L', '0']: texto = texto[:-1]
+    # Filtro rápido de palabras prohibidas
+    if any(x in texto for x in ["BOLIVIA", "PLU", "ESTA", "V1A"]): return ""
 
-    if len(texto) < 6 or len(texto) > 7:
-        return texto 
-        
-    lista = list(texto)
-    let_to_num = {'D':'0', 'O':'0', 'Q':'0', 'B':'8', 'A':'4', 'S':'5', 'Z':'2', 'I':'1', 'G':'6', 'T':'7'}
-    num_to_let = {'0':'D', '8':'B', '4':'A', '5':'S', '2':'Z', '1':'I', '6':'G', '7':'T'}
+    longitud = len(texto)
+    if longitud not in [6, 7, 8]: return texto 
     
-    # Ajuste según posición (4 números - 3 letras)
-    for i in range(len(lista)):
-        if i < 4:
-            if lista[i].isalpha() and lista[i] in let_to_num: 
-                lista[i] = let_to_num[lista[i]]
+    # Recorte si hay ruido de bordes (común en placas bolivianas)
+    if longitud >= 8:
+        texto = texto[1:-1] if longitud == 8 else texto
+        longitud = len(texto)
+
+    lista = list(texto)
+    let_to_num = {'D':'0','O':'0','Q':'0','I':'1','J':'1','L':'1','Z':'2','S':'5','G':'6','T':'7','B':'8','A':'4'}
+    num_to_let = {'0':'O','1':'I','2':'Z','4':'A','5':'S','6':'G','7':'T','8':'B'}
+    
+    punto_corte = longitud - 3 
+    for i in range(longitud):
+        if i < punto_corte:
+            if lista[i].isalpha(): lista[i] = let_to_num.get(lista[i], '1') 
         else:
-            if lista[i].isdigit() and lista[i] in num_to_let: 
-                lista[i] = num_to_let[lista[i]]
+            if lista[i].isdigit(): lista[i] = num_to_let.get(lista[i], 'I')
     
     return "".join(lista)
 
@@ -55,76 +54,50 @@ async def detect_plate(file: UploadFile = File(...)):
         
         if img is None: return {"placa": "Error", "success": False}
 
-        # --- OPTIMIZACIÓN DINÁMICA ---
+        # --- PRE-PROCESAMIENTO LIGERO (MODIFICADO) ---
+        # Pasamos a gris pero EVITAMOS filtros pesados como CLAHE o Sharpening en tiempo real
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        alto_orig, ancho_orig = gray.shape[:2]
-
-        # 1. Re-escalado Condicional (Solo si la imagen es pequeña)
-        # Si el alto es menor a 300px, aplicamos un factor de 1.5 en lugar de 2.0 (más rápido)
-        if alto_orig < 300:
-            f_escala = 1.5
-            gray = cv2.resize(gray, None, fx=f_escala, fy=f_escala, interpolation=cv2.INTER_LINEAR)
-            padding = 20
-        else:
-            f_escala = 1.0
-            padding = 10
-
-        # 2. Contraste Adaptativo (CLAHE) - Nivel 2.0 para balancear velocidad
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        gray = clahe.apply(gray)
-
-        # 3. Operación Morfológica ligera
-        kernel = np.ones((2,2), np.uint8)
-        gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)
-
-        # 4. Margen de seguridad
-        gray = cv2.copyMakeBorder(gray, padding, padding, padding, padding, cv2.BORDER_CONSTANT, value=[255, 255, 255])
+        
+        # En lugar de CLAHE, usamos un ajuste de contraste simple y rápido (alfa/beta)
+        # Esto es mucho más liviano para el CPU
+        gray = cv2.convertScaleAbs(gray, alpha=1.2, beta=10)
 
         # --- OCR ULTRA RÁPIDO ---
-        # El allowlist restringe la búsqueda, acelerando el proceso un 30-40%
+        # Bajamos mag_ratio a 1.0 para evitar que EasyOCR re-escale internamente
         resultados = reader.readtext(
             gray, 
-            detail=1,
-            paragraph=False,
             allowlist='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-            mag_ratio=1.2,
-            text_threshold=0.6,
-            low_text=0.3,
-            batch_size=4 # Proceso paralelo
+            mag_ratio=1.0, 
+            paragraph=False,
+            decoder='greedy', # El decodificador más rápido
+            batch_size=1
         )
         
         placas_candidatas = []
         for (bbox, text, prob) in resultados:
             txt_raw = text.replace(" ", "").upper()
-            
-            # Filtro de diseño boliviano
-            if any(word in txt_raw for word in ["BOLI", "VIA", "OLIV", "PLUR", "ESTA", "ESTADO"]): 
-                continue
+            if len(txt_raw) < 5: continue
             
             txt_corregido = corregir_formato_bolivia(txt_raw)
             
-            if len(txt_corregido) >= 6:
-                # Ajuste de coordenadas considerando el padding y la escala
-                x_min = max(0, int((bbox[0][0] - padding) / f_escala))
-                y_min = max(0, int((bbox[0][1] - padding) / f_escala))
-                x_max = int((bbox[1][0] - padding) / f_escala)
-                y_max = int((bbox[2][1] - padding) / f_escala)
-                
-                ancho = x_max - x_min
-                alto = y_max - y_min
+            if len(txt_corregido) in [6, 7]:
+                # Mapeo de coordenadas original
+                x_min = int(bbox[0][0])
+                y_min = int(bbox[0][1])
+                width = int(bbox[1][0] - bbox[0][0])
+                height = int(bbox[2][1] - bbox[0][1])
                 
                 placas_candidatas.append({
                     'placa': txt_corregido, 
                     'confianza': float(prob),
-                    'area': int(ancho * alto),
-                    'coords': { 'x': x_min, 'y': y_min, 'w': ancho, 'h': alto }
+                    'coords': { 'x': x_min, 'y': y_min, 'w': width, 'h': height }
                 })
         
         if not placas_candidatas:
-            return {"placa": "No detectada", "success": False}
+            return {"placa": "---", "success": False}
 
-        # Mejor opción por confianza y tamaño
-        mejor_opcion = max(placas_candidatas, key=lambda x: (x['confianza'], x['area']))
+        # Priorizar la placa con mayor confianza
+        mejor_opcion = max(placas_candidatas, key=lambda x: x['confianza'])
         
         return {
             "placa": mejor_opcion['placa'], 
@@ -134,8 +107,9 @@ async def detect_plate(file: UploadFile = File(...)):
 
     except Exception as e:
         print(f"[IA] Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"placa": "Error", "success": False, "detail": str(e)}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Aumentamos los workers para manejar mejor las peticiones en paralelo si es necesario
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)

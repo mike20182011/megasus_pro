@@ -1,27 +1,35 @@
 /* src/app/app.component.css */
+
 :host {
   display: block;
-  background-color: var(--color-megasus-dark);
+  /* CAMBIO CLAVE: Quitamos el color sólido para que se vea el degradado del body */
+  background-color: transparent !important;
 }
 
-/* Opcional: Personalizar el scrollbar para que sea oscuro */
+/* Opcional: Personalizar el scrollbar para que sea oscuro y combine con el fondo global */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #1a1a2e;
+  background: transparent; /* Dejamos que se vea el fondo detrás */
 }
 ::-webkit-scrollbar-thumb {
   background: #4ecca3;
   border-radius: 4px;
 }
 
-/* Asegura que el fondo detrás de los bordes redondeados sea el color oscuro base */
+/* ELIMINAMOS el background-color de aquí para que no tape el router-outlet */
 .flex.flex-1 {
-  background-color: #1a1a2e;
+  background-color: transparent !important;
 }
 
-/* Suavizar las transiciones de colapso */
+/* Suavizar las transiciones de colapso (mantenemos tu funcionalidad) */
 aside {
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), margin 0.3s;
+}
+
+/* Estilo extra para que el fondo del menú lateral no se pierda */
+aside.bg-\[\#16213e\] {
+    background-color: rgba(22, 33, 62, 0.8) !important;
+    backdrop-filter: blur(10px);
 }

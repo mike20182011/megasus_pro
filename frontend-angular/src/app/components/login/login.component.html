@@ -11,10 +11,23 @@
           <input type="email" formControlName="email" id="email" placeholder="Email" class="glass-input">
         </div>
 
-        <div class="field password-field">
-          <input type="password" formControlName="password" id="password" placeholder="Contraseña" class="glass-input">
-          <span class="password-toggle">👁️</span>
-        </div>
+        <div class="field password-field relative group">
+  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#4ecca3]/50 group-focus-within:text-[#4ecca3] transition-colors">
+    <lucide-icon [img]="Lock" class="w-4 h-4"></lucide-icon>
+  </span>
+
+  <input 
+    [type]="hidePassword ? 'password' : 'text'" 
+    formControlName="password" 
+    id="password" 
+    placeholder="Contraseña" 
+    class="glass-input pl-12 pr-12 w-full"> <button 
+    type="button"
+    (click)="togglePassword()" 
+    class="absolute right-4 top-1/2 -translate-y-1/2 text-[#4ecca3] hover:text-white transition-colors outline-none cursor-pointer">
+    <lucide-icon [img]="hidePassword ? Eye : EyeOff" class="w-5 h-5"></lucide-icon>
+  </button>
+</div>
 
         <div class="button-wrapper">
           <button type="submit" [disabled]="loginForm.invalid" class="login-button">

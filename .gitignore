@@ -1,12 +1,34 @@
-# Ignorar entornos virtuales
+# --- Entornos Virtuales y Python ---
 ai-service-python/.venv/
 .venv/
 venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
 
-# Ignorar Node (Angular y Nest)
+# --- Node / Angular / NestJS ---
 **/node_modules/
 **/dist/
 .angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.nestcli.json
 
-# Ignorar archivos locales
+# --- Docker ---
+# Si alguna vez guardas los datos de la DB en una carpeta local
+# ej: ./postgres_data, asegúrate de ignorarla
+postgres_data/
+
+# --- Archivos del Sistema / IDE ---
 .env
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Backups de Base de Datos ---
+# Es mejor no subir el backup.sql a GitHub por seguridad y peso
+*.sql

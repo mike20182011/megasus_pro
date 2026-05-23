@@ -1,0 +1,45 @@
+#version: '3.8'
+
+services:
+  # 1. Base de Datos
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres       # Cambiado user
+      POSTGRES_PASSWORD: 123456     # Cambiado a tu contraseña
+      POSTGRES_DB: uno_prueba1      # Cambiado al nombre de tu base de datos
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Backend (NestJS)
+  backend:
+    build: ./backend-nest
+    depends_on: 
+      - db
+      - ia-python
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres         # Debe coincidir con el usuario de la DB
+      DB_PASSWORD: 123456       # Debe coincidir con la contraseña de la DB
+      DB_NAME: uno_prueba1
+    ports: ["3000:3000"]
+
+  # 3. Frontend (Angular)
+  frontend:
+    build: ./frontend-angular
+    ports: ["80:80"]
+    depends_on: ["backend"]
+
+
+  ia-python:
+    build: ./ai-service-python  # Pon el nombre real de la carpeta
+    expose:
+      - "8000"
+    # Esto asegura que la IA esté lista antes que el backend intente conectar
+    restart: always
+
+volumes:
+  postgres_data:

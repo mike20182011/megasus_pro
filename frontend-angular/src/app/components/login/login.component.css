@@ -8,7 +8,7 @@
   height: 100vh;
   width: 100vw;
   /* CAMBIA ESTA RUTA POR LA DE TU IMAGEN REAL */
-  background-image: url('../../../../../assets/logo_login.png');
+  background-image: url('/assets/fondo_megasus.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

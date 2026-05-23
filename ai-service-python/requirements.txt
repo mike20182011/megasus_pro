@@ -2,6 +2,6 @@ fastapi
 uvicorn
 python-multipart
 easyocr
-opencv-python
+opencv-python-headless
 numpy
 Pillow

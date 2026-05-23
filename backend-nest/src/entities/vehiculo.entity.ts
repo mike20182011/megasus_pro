@@ -3,32 +3,32 @@ import { Entity, Column, PrimaryColumn } from 'typeorm';
 @Entity('vehiculos')
 export class Vehiculo {
   @PrimaryColumn()
-  placa: string;
+  placa!: string;
 
   @Column({ nullable: true })
-  propietario: string;
+  propietario!: string;
 
   @Column({ nullable: true })
-  poliza: string;
+  poliza!: string;
 
   @Column({ nullable: true })
-  clase_vehiculo: string;
+  clase_vehiculo!: string;
 
   @Column({ nullable: true })
-  marca: string;
+  marca!: string;
 
   @Column({ nullable: true })
-  tipo: string;
+  tipo!: string;
 
   @Column({ nullable: true })
-  modelo: number;
+  modelo!: number;
 
   @Column({ nullable: true })
-  servicio: string;
+  servicio!: string;
 
   @Column({ nullable: true })
-  color: string;
+  color!: string;
 
   @Column({ nullable: true })
-  radicatoria: string;
+  radicatoria!: string;
 }

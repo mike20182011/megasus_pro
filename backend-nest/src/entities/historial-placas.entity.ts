@@ -3,26 +3,26 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeor
 @Entity('historial_placas')
 export class HistorialPlaca {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ length: 20 })
-  texto_placa: string;
+  texto_placa!: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  fecha_hora: Date;
+  fecha_hora!: Date;
 
   @Column({ length: 50, nullable: true })
-  usuario_registro: string;
+  usuario_registro!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  total_deuda: number;
+  total_deuda!: number;
 
   @Column({ length: 100, nullable: true })
-propietario: string;
+propietario!: string;
 
 @Column({ length: 50, nullable: true })
-marca: string;
+marca!: string;
 
 @Column({ type: 'integer', nullable: true })
-modelo: number;
+modelo!: number;
 }

@@ -31,7 +31,7 @@ export class VehiculosController {
     try {
       // 2. Llamada al servicio de detección de placas
       const respuestaPython = await lastValueFrom(
-        this.httpService.post('http://localhost:8000/detect-plate', formData, {
+        this.httpService.post('http://ia-python:8000/detect-plate', formData, {
           headers: formData.getHeaders(),
           timeout: 15000,
         }),

@@ -4,28 +4,28 @@ import { Vehiculo } from './vehiculo.entity'; // Asegúrate de que la ruta sea c
 @Entity('reportes_robo')
 export class ReporteRobo {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ length: 20 })
-  placa: string;
+  placa!: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  fecha_reporte: Date;
+  fecha_reporte!: Date;
 
   @Column({ type: 'text', nullable: true })
-  descripcion_incidente: string;
+  descripcion_incidente!: string;
 
   @Column({ length: 20, default: 'ACTIVO' })
-  estado: string; // 'ACTIVO' o 'RECUPERADO'
+  estado!: string; // 'ACTIVO' o 'RECUPERADO'
 
   @Column({ type: 'timestamp', nullable: true })
-  fecha_recuperacion: Date;
+  fecha_recuperacion!: Date;
 
   @Column({ length: 100, nullable: true })
-  autoridad_cargo: string;
+  autoridad_cargo!: string;
 
   // Relación opcional por si quieres hacer Joins automáticos después
   @ManyToOne(() => Vehiculo)
   @JoinColumn({ name: 'placa' })
-  vehiculo: Vehiculo;
+  vehiculo!: Vehiculo;
 }

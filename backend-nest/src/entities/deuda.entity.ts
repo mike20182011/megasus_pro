@@ -4,21 +4,21 @@ import { Vehiculo } from './vehiculo.entity';
 @Entity('deudas')
 export class Deuda {
   @PrimaryGeneratedColumn() // <--- Esta es la forma correcta
-  id: number;
+  id!: number;
 
   @Column()
-  placa: string;
+  placa!: string;
 
   @Column()
-  gestion: number;
+  gestion!: number;
 
   @Column('text')
-  detalle: string;
+  detalle!: string;
 
   @Column('decimal')
-  importe_final: number;
+  importe_final!: number;
 
   @ManyToOne(() => Vehiculo)
   @JoinColumn({ name: 'placa' })
-  vehiculo: Vehiculo;
+  vehiculo!: Vehiculo;
 }

@@ -25,13 +25,13 @@ import { ReporteRobo } from './entities/reporte-robo.entity';
     HttpModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '123456', // Tu contraseña de ayer
-      database: 'uno_prueba1',
-      autoLoadEntities: true, // Esto cargará automáticamente tus tablas
-      synchronize: false,    // Importante: false para no borrar tus datos actuales
+      host: process.env.DB_HOST || 'localhost', 
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || '123456',
+  database: process.env.DB_NAME || 'uno_prueba1',
+  autoLoadEntities: true,
+  synchronize: false,
     }),
     TypeOrmModule.forFeature([Vehiculo, Deuda, Usuario,ReporteRobo]),
     JwtModule.register({
